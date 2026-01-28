@@ -2,25 +2,29 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PhotoAnalysis } from "../types";
 
+const extractBase64Data = (base64String: string): string => {
+  const parts = base64String.split(',');
+  return parts.length > 1 ? parts[1] : base64String;
+};
+
 export const analyzePhoto = async (base64Image: string): Promise<PhotoAnalysis> => {
-  // Initialize right before call to ensure up-to-date API Key
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: {
+    contents: [{
       parts: [
         {
           inlineData: {
             mimeType: 'image/jpeg',
-            data: base64Image.split(',')[1] || base64Image,
+            data: extractBase64Data(base64Image),
           },
         },
         {
-          text: 'Analyze this photo and provide a brief summary of the person, their key features (like hair color, expression, clothing style), and the overall vibe of the photo. Return the result in JSON format.'
+          text: 'Analyze this photo and provide a brief summary of the person, their key features, and the overall vibe. Return the result in JSON format.'
         }
       ]
-    },
+    }],
     config: {
       responseMimeType: 'application/json',
       responseSchema: {
@@ -47,66 +51,68 @@ export const travelToEra = async (base64Image: string, prompt: string): Promise<
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: {
+    model: 'gemini-3-pro-image-preview',
+    contents: [{
       parts: [
         {
           inlineData: {
             mimeType: 'image/jpeg',
-            data: base64Image.split(',')[1] || base64Image,
+            data: extractBase64Data(base64Image),
           },
         },
-        {
-          text: prompt
-        },
+        { text: prompt },
       ],
-    },
+    }],
     config: {
       imageConfig: {
-        aspectRatio: "1:1"
+        aspectRatio: "1:1",
+        imageSize: "1K"
       }
     }
   });
 
-  for (const part of response.candidates[0].content.parts) {
+  const parts = response.candidates?.[0]?.content?.parts || [];
+  for (const part of parts) {
     if (part.inlineData) {
       return `data:image/png;base64,${part.inlineData.data}`;
     }
   }
   
-  throw new Error("Failed to generate time-travel photo.");
+  throw new Error("Manifestation failed. Quantum sync error.");
 };
 
 export const editPhoto = async (base64Image: string, editPrompt: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-image',
-    contents: {
+    model: 'gemini-3-pro-image-preview',
+    contents: [{
       parts: [
         {
           inlineData: {
             mimeType: 'image/jpeg',
-            data: base64Image.split(',')[1] || base64Image,
+            data: extractBase64Data(base64Image),
           },
         },
         {
-          text: `Apply this edit to the image: ${editPrompt}. Maintain the person and the general scene, but modify as requested.`
+          text: `Modify the image according to this instruction: ${editPrompt}. Maintain the subjects likeness and the historical context.`
         },
       ],
-    },
+    }],
     config: {
       imageConfig: {
-        aspectRatio: "1:1"
+        aspectRatio: "1:1",
+        imageSize: "1K"
       }
     }
   });
 
-  for (const part of response.candidates[0].content.parts) {
+  const parts = response.candidates?.[0]?.content?.parts || [];
+  for (const part of parts) {
     if (part.inlineData) {
       return `data:image/png;base64,${part.inlineData.data}`;
     }
   }
   
-  throw new Error("Failed to edit photo.");
+  throw new Error("Refinement failed.");
 };

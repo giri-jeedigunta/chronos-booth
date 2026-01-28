@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,59 +7,131 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'retro-yellow': '#F4E04D',
+              'retro-blue': '#54ACD2',
+              'retro-pink': '#E16D8D',
+              'retro-green': '#7BC043',
+              'retro-black': '#1A1A1A',
+            },
+            boxShadow: {
+              'flat': '4px 4px 0px 0px rgba(0,0,0,1)',
+              'flat-white': '4px 4px 0px 0px rgba(255,255,255,1)',
+              'flat-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+              'flat-lg-white': '8px 8px 0px 0px rgba(255,255,255,1)',
+            }
+          }
+        }
+      }
+    </script>
     <style>
+      :root {
+        --border-color: #000000;
+        --shadow-color: rgba(0,0,0,1);
+      }
+      .dark {
+        --border-color: #ffffff;
+        --shadow-color: rgba(255,255,255,1);
+      }
       body {
-        font-family: 'Space+Grotesk', sans-serif;
-        background-color: #0a0a0c;
-        color: #f8fafc;
-        overflow-x: hidden;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: background-color 0.3s ease;
       }
       h1, h2, h3 {
-        font-family: 'Playfair+Display', serif;
+        font-family: 'Playfair Display', serif;
       }
-      .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
       }
-      .shimmer {
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-        background-size: 200% 100%;
-        animation: shimmer 2s infinite linear;
+      .neubrutalism-card {
+        background: white;
+        border: 3px solid black;
+        box-shadow: 8px 8px 0px 0px black;
+        transition: all 0.2s ease;
+      }
+      .dark .neubrutalism-card {
+        background: #1A1A1A;
+        border: 3px solid white;
+        box-shadow: 8px 8px 0px 0px white;
+      }
+      .neubrutalism-button {
+        border: 3px solid black;
+        box-shadow: 4px 4px 0px 0px black;
+        transition: all 0.1s ease;
+      }
+      .dark .neubrutalism-button {
+        border: 3px solid white;
+        box-shadow: 4px 4px 0px 0px white;
+      }
+      .neubrutalism-button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px 0px black;
+      }
+      .dark .neubrutalism-button:active {
+        box-shadow: 2px 2px 0px 0px white;
+      }
+      .neubrutalism-button:disabled {
+        transform: none;
+        box-shadow: none;
+        background: #e5e7eb;
+        border-color: #9ca3af;
+        color: #9ca3af;
+      }
+      .dark .neubrutalism-button:disabled {
+        background: #374151;
+        border-color: #4b5563;
+        color: #4b5563;
       }
       .mirror {
         transform: scaleX(-1);
       }
-      @keyframes shimmer {
-        from { background-position: -200% 0; }
-        to { background-position: 200% 0; }
+      /* Custom Range Input Neubrutalism */
+      input[type=range] {
+        -webkit-appearance: none;
+        background: transparent;
       }
-      /* Custom Range Input Styling */
+      input[type=range]::-webkit-slider-runnable-track {
+        height: 12px;
+        background: #e5e7eb;
+        border: 2px solid black;
+      }
+      .dark input[type=range]::-webkit-slider-runnable-track {
+        background: #374151;
+        border: 2px solid white;
+      }
       input[type=range]::-webkit-slider-thumb {
         -webkit-appearance: none;
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #3b82f6;
+        height: 24px;
+        width: 24px;
+        background: #F4E04D;
+        border: 2px solid black;
+        margin-top: -8px;
         cursor: pointer;
-        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      }
+      .dark input[type=range]::-webkit-slider-thumb {
+        border: 2px solid white;
       }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
+    "react/": "https://esm.sh/react@19.0.0/",
+    "react": "https://esm.sh/react@19.0.0",
+    "@google/genai": "https://esm.sh/@google/genai@1.38.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.563.0"
   }
 }
 </script>
 </head>
-<body>
+<body class="bg-white dark:bg-retro-black text-black dark:text-white">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
