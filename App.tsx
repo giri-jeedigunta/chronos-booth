@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { CameraModule } from './components/CameraModule';
+import { MusicPlayer } from './components/MusicPlayer';
 import { ERAS } from './constants';
 import { TimeTravelState, HistoricalEra } from './types';
 import { analyzePhoto, travelToEra, editPhoto } from './services/geminiService';
@@ -124,7 +125,7 @@ const App: React.FC = () => {
           </section>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Result and Controls */}
+            {/* Left Column: Result, Music and Controls */}
             <div className="lg:col-span-2 space-y-8">
               <div className="relative rounded-3xl overflow-hidden glass-card aspect-square md:aspect-video flex items-center justify-center bg-black/40 group shadow-2xl">
                 {state.status === 'traveling' || state.status === 'editing' ? (
@@ -165,6 +166,11 @@ const App: React.FC = () => {
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Music Player Section */}
+              <div className="animate-in fade-in slide-in-from-bottom-4">
+                <MusicPlayer era={state.currentEra} />
               </div>
 
               {/* Editing Controls */}

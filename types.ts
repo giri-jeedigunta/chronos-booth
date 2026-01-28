@@ -5,6 +5,7 @@ export interface HistoricalEra {
   description: string;
   prompt: string;
   image: string;
+  musicUrl: string;
 }
 
 export interface PhotoAnalysis {
