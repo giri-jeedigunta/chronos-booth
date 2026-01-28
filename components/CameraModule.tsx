@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Upload, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Camera, Upload, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface CameraModuleProps {
   onCapture: (base64: string) => void;
@@ -16,16 +16,18 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
   const startCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' }, 
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, 
         audio: false 
       });
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        // Play manually to ensure it starts
+        videoRef.current.play().catch(e => console.warn("Auto-play prevented", e));
       }
       setError(null);
     } catch (err) {
-      setError("Camera access denied. Please upload a photo instead.");
+      setError("Camera access denied or not available. Please upload a photo instead.");
       console.error(err);
     }
   };
@@ -33,12 +35,14 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
   useEffect(() => {
     startCamera();
     return () => {
-      stream?.getTracks().forEach(track => track.stop());
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
   const takePhoto = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !stream) return;
     
     // Trigger Flash Effect
     setIsFlashing(true);
@@ -49,8 +53,13 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
     canvas.height = videoRef.current.videoHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    // Mirror the capture to match the preview
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    
     ctx.drawImage(videoRef.current, 0, 0);
-    const base64 = canvas.toDataURL('image/jpeg');
+    const base64 = canvas.toDataURL('image/jpeg', 0.9);
     onCapture(base64);
   };
 
@@ -66,17 +75,19 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
-      <div className="relative w-full aspect-video rounded-3xl overflow-hidden glass-card shadow-2xl group">
+      <div className="relative w-full aspect-video rounded-3xl overflow-hidden glass-card shadow-2xl group bg-zinc-950">
         {!error ? (
           <video 
             ref={videoRef} 
             autoPlay 
             playsInline 
+            muted
             className="w-full h-full object-cover mirror"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-red-400 p-8 text-center bg-zinc-900/50">
-            {error}
+          <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 p-8 text-center gap-4">
+            <AlertCircle className="w-12 h-12 text-red-500/50" />
+            <p className="text-sm font-medium">{error}</p>
           </div>
         )}
 
@@ -86,35 +97,40 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
         )}
         
         {isLoading && (
-          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-            <RefreshCw className="w-12 h-12 text-blue-400 animate-spin mb-4" />
-            <p className="text-xl font-medium tracking-wide">Synchronizing Temporal Signature...</p>
-            <p className="text-zinc-500 text-sm mt-2">Locking onto coordinates...</p>
+          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10 backdrop-blur-md">
+            <div className="relative w-16 h-16 mb-6">
+               <RefreshCw className="w-full h-full text-blue-500 animate-spin" />
+            </div>
+            <p className="text-xl font-medium tracking-wide text-white">Capturing Temporal Signature...</p>
+            <p className="text-blue-400/60 text-sm mt-2 font-mono uppercase tracking-widest">Quantum Link Active</p>
           </div>
         )}
 
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={takePhoto}
-            disabled={isLoading || !!error}
-            className="p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-all disabled:opacity-50 border border-white/20"
-          >
-            <Camera className="w-8 h-8 text-white" />
-          </button>
-        </div>
+        {!isLoading && !error && (
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <button 
+              onClick={takePhoto}
+              className="p-6 bg-white/10 hover:bg-blue-600 backdrop-blur-xl border border-white/20 rounded-full transition-all hover:scale-110 active:scale-90 shadow-2xl shadow-blue-500/20"
+              title="Capture Image"
+            >
+              <Camera className="w-10 h-10 text-white" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4 w-full px-4">
-        <label className="flex-1 flex items-center justify-center gap-2 py-4 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded-2xl cursor-pointer transition-all">
-          <Upload className="w-5 h-5 text-zinc-400" />
-          <span className="text-zinc-300 font-medium">Upload from Archive</span>
+        <label className="flex-1 flex items-center justify-center gap-3 py-4 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-2xl cursor-pointer transition-all hover:border-blue-500/30 group">
+          <Upload className="w-5 h-5 text-zinc-500 group-hover:text-blue-400" />
+          <span className="text-zinc-400 font-medium group-hover:text-zinc-200">Import from Archives</span>
           <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
         </label>
         
         {error && (
           <button 
             onClick={startCamera}
-            className="p-4 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/50 text-blue-400 rounded-2xl transition-all"
+            className="p-4 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 rounded-2xl transition-all"
+            title="Retry Camera"
           >
             <RefreshCw className="w-5 h-5" />
           </button>

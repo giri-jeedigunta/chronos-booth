@@ -3,10 +3,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PhotoAnalysis } from "../types";
 
 export const analyzePhoto = async (base64Image: string): Promise<PhotoAnalysis> => {
+  // Initialize right before call to ensure up-to-date API Key
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3-flash-preview',
     contents: {
       parts: [
         {
@@ -60,6 +61,11 @@ export const travelToEra = async (base64Image: string, prompt: string): Promise<
         },
       ],
     },
+    config: {
+      imageConfig: {
+        aspectRatio: "1:1"
+      }
+    }
   });
 
   for (const part of response.candidates[0].content.parts) {
@@ -89,6 +95,11 @@ export const editPhoto = async (base64Image: string, editPrompt: string): Promis
         },
       ],
     },
+    config: {
+      imageConfig: {
+        aspectRatio: "1:1"
+      }
+    }
   });
 
   for (const part of response.candidates[0].content.parts) {
