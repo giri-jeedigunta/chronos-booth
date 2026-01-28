@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, Upload, RefreshCw } from 'lucide-react';
+import { Camera, Upload, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 interface CameraModuleProps {
   onCapture: (base64: string) => void;
@@ -11,6 +11,7 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isFlashing, setIsFlashing] = useState(false);
 
   const startCamera = async () => {
     try {
@@ -38,6 +39,11 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
 
   const takePhoto = () => {
     if (!videoRef.current) return;
+    
+    // Trigger Flash Effect
+    setIsFlashing(true);
+    setTimeout(() => setIsFlashing(false), 150);
+
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -73,11 +79,17 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
             {error}
           </div>
         )}
+
+        {/* Shutter Flash */}
+        {isFlashing && (
+          <div className="absolute inset-0 bg-white z-50 animate-out fade-out duration-150" />
+        )}
         
         {isLoading && (
           <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
             <RefreshCw className="w-12 h-12 text-blue-400 animate-spin mb-4" />
-            <p className="text-xl font-medium tracking-wide">Initializing Time Core...</p>
+            <p className="text-xl font-medium tracking-wide">Synchronizing Temporal Signature...</p>
+            <p className="text-zinc-500 text-sm mt-2">Locking onto coordinates...</p>
           </div>
         )}
 
@@ -85,7 +97,7 @@ export const CameraModule: React.FC<CameraModuleProps> = ({ onCapture, isLoading
           <button 
             onClick={takePhoto}
             disabled={isLoading || !!error}
-            className="p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-all disabled:opacity-50"
+            className="p-4 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-all disabled:opacity-50 border border-white/20"
           >
             <Camera className="w-8 h-8 text-white" />
           </button>
