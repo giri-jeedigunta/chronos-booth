@@ -1,0 +1,7 @@
+{
+  "name": "Chronos Booth",
+  "description": "A magical time-travel photo booth that transports you through history using Gemini AI. Upload your photo and see yourself in ancient civilizations, futuristic cities, or iconic historical moments.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
